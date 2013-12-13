@@ -20,10 +20,12 @@ public class FileCopy {
 		InputStream in = new BufferedInputStream(new FileInputStream(args[0]));
 
 		FileSystem fs = FileSystem.get(URI.create(args[1]), conf);
+		
 
 		OutputStream out = fs.create(new Path(args[1]));
 		IOUtils.copyBytes(in, out, 4096, true);
 		
+		//comment
 		
 	}
 }
