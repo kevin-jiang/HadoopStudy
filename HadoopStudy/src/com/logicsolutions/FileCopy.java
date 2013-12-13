@@ -23,5 +23,7 @@ public class FileCopy {
 
 		OutputStream out = fs.create(new Path(args[1]));
 		IOUtils.copyBytes(in, out, 4096, true);
+		
+		
 	}
 }
