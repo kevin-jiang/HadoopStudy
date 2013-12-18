@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -15,16 +16,23 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.Tool;
+import org.apache.hadoop.util.ToolRunner;
 
-public class WordCountApp {
+public class WordCountApp extends Configured implements Tool{
 	
-	static final String commaSeparatedPaths = "hdfs://192.168.42.118:9000/user/root/readme.txt";
-	private static final String OUT_PATH = "hdfs://192.168.42.118:9000/user/root/result.txt";
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) throws Exception {
+	static String commaSeparatedPaths = "";
+	static String OUT_PATH = "";
+	
+	
+	@Override
+	public int run(String[] arg0) throws Exception {
+		
+		commaSeparatedPaths = arg0[0];
+		OUT_PATH = arg0[1];
+		
+		
+		
 		Configuration conf = new Configuration();
 		
 		FileSystem fileSystem = FileSystem.get(new URI(commaSeparatedPaths), conf);
@@ -33,12 +41,13 @@ public class WordCountApp {
 		}
 		
 		Job job = new Job(conf, WordCountApp.class.getSimpleName());
+		job.setJarByClass(WordCountApp.class);
 		
 		//1.指定输入在哪里
-		String commaSeparatedPaths;
 		FileInputFormat.setInputPaths(job, WordCountApp.commaSeparatedPaths);
 		//指定对输入数据进行格式化处理的类
 		job.setInputFormatClass(TextInputFormat.class);
+		
 		
 		//2.指定自定义的Mapper类
 		job.setMapperClass(WordCountApp.MyMapper.class);
@@ -69,6 +78,15 @@ public class WordCountApp {
 		
 		//把作业提交给jobtracker执行
 		job.waitForCompletion(true);
+		
+		return 0;
+	}
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) throws Exception {
+		ToolRunner.run(new WordCountApp(), args);
 	}
 	
 	/**
@@ -79,8 +97,9 @@ public class WordCountApp {
 	 *
 	 */
 	static class MyMapper extends Mapper<LongWritable, Text, Text, LongWritable> {
+		@SuppressWarnings("unchecked")
 		@Override
-		protected void map(LongWritable key, Text value, org.apache.hadoop.mapreduce.Mapper.Context context) throws IOException, InterruptedException {
+		protected void map(LongWritable key, Text value, @SuppressWarnings("rawtypes") org.apache.hadoop.mapreduce.Mapper.Context context) throws IOException, InterruptedException {
 			String[] splited = value.toString().split(" ");
 			for (String word : splited) {
 				context.write(new Text(word), new LongWritable(1L));
@@ -99,7 +118,8 @@ public class WordCountApp {
 	 */
 	static class MyReduce extends Reducer<Text, LongWritable, Text, LongWritable>{
 			
-		protected void reduce(Text k2, Iterable<LongWritable> v2s, org.apache.hadoop.mapreduce.Reducer.Context context) throws IOException, InterruptedException {
+		@SuppressWarnings("unchecked")
+		protected void reduce(Text k2, Iterable<LongWritable> v2s, @SuppressWarnings("rawtypes") org.apache.hadoop.mapreduce.Reducer.Context context) throws IOException, InterruptedException {
 			long count = 0L;
 			for (LongWritable v2 : v2s) {
 				count += v2.get();
@@ -110,5 +130,4 @@ public class WordCountApp {
 		
 		
 	}
-
 }
