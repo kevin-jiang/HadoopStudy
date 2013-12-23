@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.Counters.Counter;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -34,8 +35,8 @@ import org.apache.hadoop.mapred.lib.HashPartitioner;
 public class OldApp {
 
 	
-	static final String commaSeparatedPaths = "hdfs://192.168.42.118:9000/user/root/readme.txt";
-	private static final String OUT_PATH = "hdfs://192.168.42.118:9000/user/root/result.txt";
+	static final String commaSeparatedPaths = "hdfs://kevinhadoop:9000/user/root/readme.txt";
+	private static final String OUT_PATH = "hdfs://kevinhadoop:9000/user/root/result.txt";
 
 	/**
 	 * 不在使用job对象  ，而是使用jobconf
@@ -92,7 +93,17 @@ public class OldApp {
 	static class MyMapper extends MapReduceBase implements Mapper<LongWritable, Text, Text, LongWritable>{
 		@Override
 		public void map(LongWritable k1, Text v1, OutputCollector<Text, LongWritable> collector, Reporter repoter) throws IOException {
-			String[] splited = v1.toString().split(" ");
+			
+			//计数器
+			Counter counter = repoter.getCounter("Sensitive Counter", "Hello Counter");
+			
+			String value = v1.toString();
+			if(value.contains("Hello")){
+				counter.increment(1L);
+			}
+			
+			
+			String[] splited = value.split(" ");
 			for (String word : splited) {
 				collector.collect(new Text(word), new LongWritable(1L));
 			}

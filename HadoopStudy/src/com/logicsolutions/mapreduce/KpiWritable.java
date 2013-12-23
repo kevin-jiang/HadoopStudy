@@ -8,10 +8,10 @@ import org.apache.hadoop.io.Writable;
 
 public class KpiWritable implements Writable {
 	
-	long upPackNum;
-	long downPackNum;
-	long upPayLoad;
-	long downPayLoad;
+	public long upPackNum;
+	public long downPackNum;
+	public long upPayLoad;
+	public long downPayLoad;
 	
 	
 	

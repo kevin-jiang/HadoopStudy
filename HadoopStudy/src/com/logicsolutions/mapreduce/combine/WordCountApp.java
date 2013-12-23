@@ -1,4 +1,4 @@
-package com.logicsolutions.mapreduce;
+package com.logicsolutions.mapreduce.combine;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,17 +21,12 @@ import org.apache.hadoop.util.ToolRunner;
 
 public class WordCountApp extends Configured implements Tool{
 	
-	static String commaSeparatedPaths = "";
-	static String OUT_PATH = "";
+	static final String commaSeparatedPaths = "hdfs://kevinhadoop:9000/user/root/readme.txt";
+	private static final String OUT_PATH = "hdfs://kevinhadoop:9000/user/root/result.txt";
 	
 	
 	@Override
 	public int run(String[] arg0) throws Exception {
-		
-		commaSeparatedPaths = arg0[0];
-		OUT_PATH = arg0[1];
-		
-		
 		
 		Configuration conf = new Configuration();
 		
@@ -62,6 +57,7 @@ public class WordCountApp extends Configured implements Tool{
 		//4. 排序  分组
 		
 		//5. 归约
+		job.setCombinerClass(MyReduce.class); 
 		
 		
 		//1. 指定定义的reduce函数
