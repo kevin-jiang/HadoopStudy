@@ -11,7 +11,6 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -35,7 +34,6 @@ public class KpiApp {
 		Job job = new Job(conf, KpiApp.class.getSimpleName());
 		
 		//1.指定输入在哪里
-		String commaSeparatedPaths;
 		FileInputFormat.setInputPaths(job, KpiApp.commaSeparatedPaths);
 		//指定对输入数据进行格式化处理的类
 		job.setInputFormatClass(TextInputFormat.class);
@@ -72,8 +70,7 @@ public class KpiApp {
 	
 	static class MyMapper extends Mapper<LongWritable, Text, Text, KpiWritable>{
 
-		@Override
-		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+		protected void map(LongWritable key, Text value, org.apache.hadoop.mapreduce.Mapper<LongWritable, Text, Text, KpiWritable>.Context context) throws IOException, InterruptedException {
 			final String[] splited = value.toString().split("\t");
 			final String msisdn = splited[1];
 			final Text k2 = new Text(msisdn);
@@ -90,7 +87,7 @@ public class KpiApp {
 		 * (non-Javadoc)
 		 * @see org.apache.hadoop.mapreduce.Reducer#reduce(KEYIN, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
 		 */
-		protected void reduce(Text k2, Iterable<KpiWritable> v2s, org.apache.hadoop.mapreduce.Reducer.Context context) throws IOException, InterruptedException {
+		protected void reduce(Text k2, Iterable<KpiWritable> v2s, org.apache.hadoop.mapreduce.Reducer<Text, KpiWritable, Text, KpiWritable>.Context context) throws IOException, InterruptedException {
 			long upPackNum = 0L;
 			long downPackNum = 0L;
 			long upPayLoad = 0L;
